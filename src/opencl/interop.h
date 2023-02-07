@@ -17,6 +17,7 @@ using std::vector;
 
 #include <QOpenGLFunctions>
 
+// Creates a set of cl_context_properties for CL context construction
 cl_context_properties* createCLGLInteropContext(const cl::Platform& platform, cl_context_properties openGLContext, cl_context_properties display);
 
 struct GLContext {
@@ -66,6 +67,8 @@ class InteropTexture2D {
 
 		GLuint getGL() { return glTexture; }
 		cl::ImageGL getCL() { return clImage; }
+		int width() { return w; }
+		int height() { return h; }
 
 	private:
 		cl::Context context;

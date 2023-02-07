@@ -7,16 +7,16 @@ using std::string;
 using std::vector;
 
 #ifdef _WIN32
+#define NOMINMAX
 #include <windows.h>
 #endif
 
 #include <iostream>
 #include <stdio.h>
 
-#define __CL_ENABLE_EXCEPTIONS
+#define CL_HPP_ENABLE_EXCEPTIONS
 
-#include <CL/cl.hpp>
-#include <CL/opencl.h>
+#include <CL/cl2.hpp>
 #include <CL/cl_gl.h>
 
 inline string to_lower(const string& s);
@@ -28,12 +28,12 @@ inline bool contains_any(const string& s, const vector<string>& matches);
 struct CLDevice {
 	cl::Device cl_device;
 	cl_platform_id platform;
-	string name, vendor;								// device name and vendor
-	string driver_version, opencl_c_version;			// device driver and OpenCL C version
+	string name, vendor;									// device name and vendor
+	string driver_version, opencl_c_version;				// device driver and OpenCL C version
 
 	bool is_cpu = false, is_gpu = false;
 
-	cl::STRING_CLASS extensions = "";					// set of extensions supported by device
+	cl::string extensions = "";								// set of extensions supported by device
 
 	int cores = 0, compute_units = 0, clock_frequency = 0;	// number of cores, maximum compute units, and clock frequency
 	float tflops = 0;										// estimated floating point efficiency

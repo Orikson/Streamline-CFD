@@ -33,6 +33,7 @@ add_library(defines STATIC "defines.h")
 target_include_directories(defines INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
 
 add_subdirectory(src/opencl)
+add_subdirectory(src/fluids)
 add_subdirectory(src/streamline)
 
 qt_add_resources(streamline resources

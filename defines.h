@@ -9,6 +9,7 @@ Modify this file to set options before the program compiles
 // Fluid properties
 #define LBM					// Lattice-Boltzmann Method (see line __ for specific options)
 //#define SSF				// Stam's Stable Fluids (see line __ for specific options)
+//#define VPH				// Volume Preserving Hyperbolic Mean Curvature Flow (see line __ for specific options)
 
 // LBM Properties
 #ifdef LBM
@@ -26,13 +27,21 @@ Modify this file to set options before the program compiles
 
 #endif
 
+// VPH Properties
+#ifdef VPH
+#define VPH_2D				// 2 dimensions
+//#define VPH_3D			// 3 dimensions
+//#define VPH_SF_LBM		// Enables surface flow tracking using the Lattice Boltzmann Method
+//#define VPH_SF_SSF		// Enables surface flow tracking using Stam's Stable Fluids
+#endif
+
 //***********************************************************************************
 // Render properties
 #define RENDER				// Enables rendering to a Qt window using OpenGL
 
 #ifdef RENDER
 #define FRAME_WIDTH	900		// Render frame width
-#define FRAME_HEIGHT 600	// Render frame height
+#define FRAME_HEIGHT 630	// Render frame height
 #endif
 
 //***********************************************************************************

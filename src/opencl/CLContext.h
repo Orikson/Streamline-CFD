@@ -8,6 +8,7 @@ using std::vector;
 using std::map;
 
 #ifdef _WIN32
+#define NOMINMAX
 #include <windows.h>
 #endif
 
@@ -16,8 +17,8 @@ using std::map;
 #include <sstream>
 #include <iostream>
 
-#define __CL_ENABLE_EXCEPTIONS
-#include <CL/cl.hpp>
+#define CL_HPP_ENABLE_EXCEPTIONS
+#include <CL/cl2.hpp>
 #include <CL/opencl.h>
 #include <CL/cl_gl.h>
 
@@ -28,6 +29,24 @@ inline string readFile(string filename);
 inline void CL_CALLBACK contextCallback(const char* errinfo, const void* private_info, size_t cb, void* user_data) {
 	qDebug() << errinfo;
 }
+
+struct Kernel {
+	cl::CommandQueue queue;
+	cl::NDRange globalOffset;
+	cl::NDRange globalRange;
+	cl::NDRange localRange;
+	vector<cl::Memory> glObjects;
+
+	inline Kernel(cl::CommandQueue& queue, cl::NDRange globalOffset, cl::NDRange globalRange, cl::NDRange localRange, vector<cl::Memory>& glObjects) {
+		this->queue = queue;
+		this->globalOffset = globalOffset;
+		this->globalRange = globalRange;
+		this->localRange = localRange;
+		this->glObjects = glObjects;
+	}
+
+	inline Kernel() {}
+};
 
 class CLContext {
 	public:
@@ -61,22 +80,25 @@ class CLContext {
 		int createProgram(string fname, string buildOptions) {
 			string sourceCode = readFile(fname);
 
-			cl::Program::Sources source(1, std::make_pair(sourceCode.c_str(), sourceCode.length()));
+			vector<cl::string> tmp = { sourceCode };
+			cl::Program::Sources source(tmp);
 			cl::Program program = buildSources(source, buildOptions);
 			programs.push_back(program);
-			return programs.size() - 1;
+			return (int)programs.size() - 1;
 		}
 		int createProgram(vector<string> fnames, string buildOptions) {
 			string sourceCode = readFile(fnames[0]);
-			cl::Program::Sources sources(fnames.size(), std::make_pair(sourceCode.c_str(), sourceCode.length()));
+			vector<cl::string> tmp = { sourceCode };
+			cl::Program::Sources sources(tmp);
+			
 			for (int i = 1; i < fnames.size(); i++) {
 				string sourceCode2 = readFile(fnames[i]);
-				sources[i] = std::make_pair(sourceCode2.c_str(), sourceCode2.length());
+				sources[i] = sourceCode2;
 			}
 
 			cl::Program program = buildSources(sources, buildOptions);
 			programs.push_back(program);
-			return programs.size() - 1;
+			return (int)programs.size() - 1;
 		}
 		int createProgram(string rname, string fname, string buildOptions) {
 			programNames[rname] = createProgram(fname, buildOptions);
@@ -128,7 +150,7 @@ class CLContext {
 			queue.enqueueAcquireGLObjects(&glObjects);
 
 			int i = 0;
-			cl::Kernel kernel(getProgram(rname), rname);
+			cl::Kernel kernel(getProgram(rname), rname.c_str());
 			([&] {
 				// Set all kernel arguments
 				kernel.setArg(i, args);
@@ -145,27 +167,15 @@ class CLContext {
 			queue.finish();
 		}
 		// Run the kernel with the given name, range, and arguments
+		// For interop, a glObjects vector is provided that must contain all relevant gl memory to the kernel
 		template <class ... Ts>
-		void runProgram(string rname, const cl::CommandQueue& queue, const cl::NDRange& globalOffset, const cl::NDRange& globalRange, const cl::NDRange& localRange, Ts &&... args) {
-			int i = 0;
-			cl::Kernel kernel(getProgram(rname), rname);
-			([&] {
-				// Set all kernel arguments
-				kernel.setArg(i, args);
-				i++;
-			}(), ...);
-
-			queue.enqueueNDRangeKernel(
-				kernel,
-				globalOffset,
-				globalRange,
-				localRange
-			);
-			queue.finish();
+		void runProgram(string rname, Kernel& kernel, Ts &&... args) {
+			runProgram(rname, kernel.queue, kernel.globalOffset, kernel.globalRange, kernel.localRange, kernel.glObjects, args...);
 		}
 
-	private:
 		cl::Context context;
+
+	private:
 		cl::Platform platform;
 		vector<cl::CommandQueue> queues;
 		vector<cl::Program> programs;
