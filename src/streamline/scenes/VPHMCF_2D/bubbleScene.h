@@ -17,6 +17,7 @@ class BubbleScene : public Scene {
 			for (int i = 0; i < n; i++) {
 				float t = 2 * 3.1415 / n * i;
 				glm::vec2 pos = glm::vec2((2.0f + sin(3.0f * t)) * sin(t), (2.0f + sin(2.0f * t)) * cos(t));
+				//glm::vec2 pos = glm::vec2(cos(t) * sin(t), sin(t));
 				verts.push_back(Vertex2D(pos * 0.1f));
 			}
 

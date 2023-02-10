@@ -1,5 +1,3 @@
-#pragma OPENCL EXTENSION cl_intel_printf : enable
-
 // Example kernel 
 __kernel void mandelbrot(
         __private float time, 

@@ -2,7 +2,7 @@
 
 #ifdef VPH
 #ifdef VPH_2D
-Bubble2D::Bubble2D(float parameterize, vector<Vertex2D> verts, QOpenGLFunctions* f, QObject* parent) : Fluid("bubble", parameterize * 0.01), vertices(verts), f(f) {
+Bubble2D::Bubble2D(float parameterize, vector<Vertex2D> verts, QOpenGLFunctions* f, QObject* parent) : Fluid("bubble2D", parameterize * 0.01), vertices(verts), f(f) {
 	n = vertices.size();
 	surfaceTension = parameterize * 10;
 

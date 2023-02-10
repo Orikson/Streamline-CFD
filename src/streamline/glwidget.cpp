@@ -79,7 +79,8 @@ void GLWidget::initializeGL() {
 #if defined(VPH_2D) // VPH
 	scene = new BubbleScene(f);
 #elif defined(D2Q9)
-	
+	cl::ImageGL imageGL = screenTexture->getCL();
+	scene = new TurbulentScene(f, clContext, queue, imageGL, screenTexture->width(), screenTexture->height());
 #else // Default
 
 #endif // Default
@@ -92,14 +93,13 @@ void GLWidget::paintGL() {
 	f->glClear(GL_COLOR_BUFFER_BIT);
 
 	// Compute CL kernel
-	clContext->runProgram("mandelbrot", mandelbrot, float(frame), screenTexture->getCL());
+	//clContext->runProgram("mandelbrot", mandelbrot, float(frame), screenTexture->getCL());
 
 	// Render screen-plane
 	scene->step();
 	scene->render();
 	if (scene->useScreenPlane()) {
 		VAO->bind();
-		shader->use();
 
 		f->glActiveTexture(GL_TEXTURE0);
 		f->glBindTexture(GL_TEXTURE_2D, screenTexture->getGL());
