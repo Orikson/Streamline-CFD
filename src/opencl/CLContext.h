@@ -3,6 +3,7 @@
 
 #include <string>
 #include <vector>
+#include <map>
 using std::string;
 using std::vector;
 using std::map;
@@ -29,6 +30,52 @@ inline string readFile(string filename);
 inline void CL_CALLBACK contextCallback(const char* errinfo, const void* private_info, size_t cb, void* user_data) {
 	qDebug() << errinfo;
 }
+
+// Double buffer
+class DoubleImage2D {
+	public:
+		DoubleImage2D() {
+
+		}
+		DoubleImage2D(const cl::Context& context, cl_mem_flags flags, cl::ImageFormat format, cl::size_type width, cl::size_type height, cl::size_type row_pitch = 0, void* host_ptr = NULL, cl_int* err = NULL) {
+			img1 = cl::Image2D(
+				context,
+				flags,
+				format,
+				width,
+				height,
+				row_pitch,
+				host_ptr,
+				err
+			);
+			img2 = cl::Image2D(
+				context,
+				flags,
+				format,
+				width,
+				height,
+				row_pitch,
+				host_ptr,
+				err
+			);
+		}
+		~DoubleImage2D() {}
+
+		cl::Image2D getActive() {
+			return toggle ? img1 : img2;
+		}
+		cl::Image2D getInactive() {
+			return toggle ? img2 : img1;
+		}
+		void swap() {
+			toggle = !toggle;
+		}
+
+	private:
+		cl::Image2D img1;
+		cl::Image2D img2;
+		bool toggle = false;
+};
 
 struct Kernel {
 	cl::CommandQueue queue;
@@ -146,11 +193,11 @@ class CLContext {
 		// Run the kernel with the given name, range, and arguments
 		// For interop, a glObjects vector is provided that must contain all relevant gl memory to the kernel
 		template <class ... Ts>
-		void runProgram(string rname, const cl::CommandQueue &queue, const cl::NDRange &globalOffset, const cl::NDRange &globalRange, const cl::NDRange &localRange, const vector<cl::Memory> &glObjects, Ts &&... args) {
+		void runProgram(string pname, string rname, const cl::CommandQueue &queue, const cl::NDRange &globalOffset, const cl::NDRange &globalRange, const cl::NDRange &localRange, const vector<cl::Memory> &glObjects, Ts &&... args) {
 			queue.enqueueAcquireGLObjects(&glObjects);
 
 			int i = 0;
-			cl::Kernel kernel(getProgram(rname), rname.c_str());
+			cl::Kernel kernel(getProgram(pname), rname.c_str());
 			([&] {
 				// Set all kernel arguments
 				kernel.setArg(i, args);
@@ -169,8 +216,8 @@ class CLContext {
 		// Run the kernel with the given name, range, and arguments
 		// For interop, a glObjects vector is provided that must contain all relevant gl memory to the kernel
 		template <class ... Ts>
-		void runProgram(string rname, Kernel& kernel, Ts &&... args) {
-			runProgram(rname, kernel.queue, kernel.globalOffset, kernel.globalRange, kernel.localRange, kernel.glObjects, args...);
+		void runProgram(string pname, string rname, Kernel& kernel, Ts &&... args) {
+			runProgram(pname, rname, kernel.queue, kernel.globalOffset, kernel.globalRange, kernel.localRange, kernel.glObjects, args...);
 		}
 
 		cl::Context context;

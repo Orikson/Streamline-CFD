@@ -8,7 +8,7 @@
     "scenes/sceneBuilder.h"
     "scenes/VPHMCF_2D/bubbleScene.h" 
     "scenes/LBM_2D/turbulentScene.h"
-)
+    "scenes/SPH_2D/damBreakScene.h")
 
 target_link_libraries(streamline PRIVATE
     defines fluids clwrapper

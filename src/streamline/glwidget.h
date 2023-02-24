@@ -25,6 +25,9 @@
 #ifdef D2Q9
 #include "scenes/LBM_2D/turbulentScene.h"
 #endif
+#ifdef SPH_2D
+#include "scenes/SPH_2D/damBreakScene.h"
+#endif
 
 class GLWidget : public QOpenGLWidget {
 	Q_OBJECT

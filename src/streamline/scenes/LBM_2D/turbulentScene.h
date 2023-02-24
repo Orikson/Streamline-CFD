@@ -12,14 +12,15 @@
 #ifdef D2Q9
 
 #define DOMAIN glm::vec2(3,3)
-#define RESOLUTION glm::vec2(128, 128)
+#define RESOLUTION glm::vec2(400, 400)
+#include <LBM/lbm2d.h>
 
 class TurbulentScene : public Scene {
 	public:
 		// Needs to know about OpenGL functions, the cl context (for building cl images/kernels), the command queue (for building kernels) and the cl-gl interop texture
 		TurbulentScene(QOpenGLFunctions* f, CLContext* context, cl::CommandQueue& queue, cl::ImageGL& interop, size_t screenWidth, size_t screenHeight) : Scene(true), context(context), interop(interop) {
-			sceneBuilder = SceneBuilder(DOMAIN, true, context->getContext(), RIGHT_FREE);
-			sceneBuilder.addCircle(glm::vec2(1, 1.5), 0.2);
+			sceneBuilder = SceneBuilder(DOMAIN, true, context->getContext(), RIGHT_FREE | LEFT_FREE);
+			sceneBuilder.addCircle(glm::vec2(1, 1.5), 0.3, BOUNDARY);
 			sceneBuilder.build("turbulentScene", RESOLUTION);
 			boundaries = sceneBuilder.getImage2D();
 
@@ -32,19 +33,21 @@ class TurbulentScene : public Scene {
 			vector<cl::Memory> glObjects;
 			glObjects.push_back(interop);
 			renderKernel = Kernel(queue, globalOffset, globalRange, localRange, glObjects);
+
+			lbm = new LBM_2D(0.1, RESOLUTION.x, RESOLUTION.y, boundaries, context, queue);
 		}
 		~TurbulentScene() {
 			delete readTexture;
 		}
 
 		void render() override {
-			context->runProgram("render_lbm", renderKernel, boundaries, 0.0f, interop);
+			context->runProgram("render_lbm", "render_lbm", renderKernel, boundaries, lbm->getVD(), 0.0f, interop);
 
 			readTexture->use();
 		}
 
 		void step() override {
-			
+			lbm->step();
 		}
 
 	private:
@@ -57,6 +60,8 @@ class TurbulentScene : public Scene {
 		Kernel renderKernel;
 
 		Shader* readTexture;
+
+		LBM_2D* lbm;
 };
 
 

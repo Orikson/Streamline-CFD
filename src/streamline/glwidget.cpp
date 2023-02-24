@@ -78,9 +78,11 @@ void GLWidget::initializeGL() {
 	// Create scene
 #if defined(VPH_2D) // VPH
 	scene = new BubbleScene(f);
-#elif defined(D2Q9)
+#elif defined(D2Q9) // LBM 2D Q9
 	cl::ImageGL imageGL = screenTexture->getCL();
 	scene = new TurbulentScene(f, clContext, queue, imageGL, screenTexture->width(), screenTexture->height());
+#elif defined(SPH_2D) // SPH
+	scene = new DamBreakScene(f);
 #else // Default
 
 #endif // Default

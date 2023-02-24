@@ -12,7 +12,7 @@ class LBM_2D : public Fluid {
 	public:
 		// init contains scene borders (and eventually emitters, tag values [for free surface / multiphase flow], etc.)
 		// constructed by SceneBuilder class
-		LBM_2D(float dx, float rRho, float rViscosity, float rC, size_t w, size_t h, cl::Image2D& init, CLContext* context, cl::CommandQueue& queue);
+		LBM_2D(float parameterize, size_t w, size_t h, cl::Image2D& init, CLContext* context, cl::CommandQueue& queue);
 
 		cl::Image2D getVD();
 
@@ -21,9 +21,6 @@ class LBM_2D : public Fluid {
 
 	private:
 		CLContext* context;
-
-		float cs = 0.57735f;
-		float dx, tau, v0, vh, u0, rho0;
 
 		// 0th directional df
 		DoubleImage2D df_0;

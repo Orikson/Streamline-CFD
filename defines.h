@@ -6,10 +6,16 @@ Modify this file to set options before the program compiles
 #define DEFINES_H
 
 //***********************************************************************************
+// Generic constants
+#define GRAVITY 9.8f		// m/s
+#define PI 3.14159f			// constant
+
+//***********************************************************************************
 // Fluid properties
-#define LBM					// Lattice-Boltzmann Method (see line __ for specific options)
+//#define LBM				// Lattice-Boltzmann Method (see line __ for specific options)
 //#define SSF				// Stam's Stable Fluids (see line __ for specific options)
 //#define VPH				// Volume Preserving Hyperbolic Mean Curvature Flow (see line __ for specific options)
+#define SPH					// Smoothed-particle Hydrodynamics (see line __ for specific options)
 
 // LBM Properties
 #ifdef LBM
@@ -33,6 +39,13 @@ Modify this file to set options before the program compiles
 //#define VPH_3D			// 3 dimensions
 //#define VPH_SF_LBM		// Enables surface flow tracking using the Lattice Boltzmann Method
 //#define VPH_SF_SSF		// Enables surface flow tracking using Stam's Stable Fluids
+#endif
+
+// SPH Properties
+#ifdef SPH
+#define SPH_2D				// 2 dimensions
+//#define SPH_3D			// 3 dimensions
+#define SPH_FS				// Free surface flow
 #endif
 
 //***********************************************************************************

@@ -9,6 +9,7 @@
 #include <QOpenGLVertexArrayObject>
 #include <glm/glm.hpp>
 #include <algorithm> 
+#include <shapes.h>
 using std::min; using std::max;
 
 struct GLMesh {
@@ -19,61 +20,6 @@ struct GLMesh {
 	vector<unsigned int> indices;
 };
 
-class Shape {
-	public:
-		Shape() {}
-		~Shape() {}
-		// Write a specified tag value into provided data of given resolution and world dimension
-		virtual void blit(char* data, unsigned int tag, glm::vec3 resolution, glm::vec3 dimensions) {}
-		virtual void blit(char* data, unsigned int tag, glm::vec2 resolution, glm::vec2 dimensions) {}
-};
-
-class Circle : public Shape {
-	public:
-		Circle(glm::vec2 center, float radius) : center2D(center), radius(radius) {
-			
-		}
-		Circle(glm::vec3 center, float radius) : center3D(center), radius(radius) {
-
-		}
-		~Circle() {
-			
-		}
-
-		void blit(char* data, unsigned int tag, glm::vec3 resolution, glm::vec3 dimensions) override {
-			glm::vec3 cCenter = center3D / dimensions * resolution;
-			float r = radius / dimensions.x * resolution.x;
-			for (unsigned int i = max(cCenter.x - r, 0.0f); i < min(cCenter.x + r, resolution.x); i++) {
-				for (unsigned int j = max(cCenter.y - r, 0.0f); j < min(cCenter.y + r, resolution.y); j++) {
-					for (unsigned int k = max(cCenter.z - r, 0.0f); k < min(cCenter.z + r, resolution.z); k++) {
-						glm::vec3 point = glm::vec3(i, j, k);
-						if (glm::distance(point, cCenter) <= r) {
-							data[(int)(i + j * resolution.x + k * resolution.x * resolution.y)] |= tag;
-						}
-					}
-				}
-			}
-		}
-
-		void blit(char* data, unsigned int tag, glm::vec2 resolution, glm::vec2 dimensions) override {
-			glm::vec2 cCenter = center2D / dimensions * resolution;
-			float r = radius / dimensions.x * resolution.x;
-			for (unsigned int i = max(cCenter.x - r, 0.0f); i < min(cCenter.x + r, resolution.x); i++) {
-				for (unsigned int j = max(cCenter.y - r, 0.0f); j < min(cCenter.y + r, resolution.y); j++) {
-					glm::vec2 point = glm::vec2(i, j);
-					if (glm::distance(point, cCenter) <= r) {
-						data[(int)(i + j * resolution.x)] |= tag;
-					}
-				}
-			}
-		}
-
-	private:
-		glm::vec2 center2D;
-		glm::vec3 center3D;
-		float radius;
-};
-
 enum SceneFlags {
 	TOP_FREE = 1,
 	BOTTOM_FREE = 2,
@@ -81,6 +27,16 @@ enum SceneFlags {
 	RIGHT_FREE = 8,
 	FRONT_FREE = 16,
 	BACK_FREE = 32
+};
+
+enum SceneTags {
+	BOUNDARY = 1,
+	EMIT_P_X = 2,
+	EMIT_P_Y = 4,
+	EMIT_P_Z = 8,
+	EMIT_N_X = 16,
+	EMIT_N_Y = 32,
+	EMIT_N_Z = 64
 };
 
 // Build scenes with standard parameterization and useful functions
@@ -98,11 +54,11 @@ class SceneBuilder {
 		}
 		~SceneBuilder() {}
 
-		void addCircle(glm::vec3 center, float radius) {
-			shapes.push_back(new Circle(center, radius));
+		void addCircle(glm::vec3 center, float radius, unsigned int tag) {
+			shapes.push_back(new Circle(center, radius, tag));
 		}
-		void addCircle(glm::vec2 center, float radius) {
-			shapes.push_back(new Circle(center, radius));
+		void addCircle(glm::vec2 center, float radius, unsigned int tag) {
+			shapes.push_back(new Circle(center, radius, tag));
 		}
 
 		void build(string name, glm::vec2 resolution) {
@@ -143,9 +99,9 @@ class SceneBuilder {
 			size_t w = (size_t)resolution.x; size_t h = (size_t)resolution.y;
 			data = new char[w * h];
 			for (unsigned int i = 0; i < w * h; i++) {
-				if (!(flags & TOP_FREE) && i < w) {
+				if (!(flags & BOTTOM_FREE) && i < w) {
 					data[i] = 1;
-				} else if (!(flags & BOTTOM_FREE) && i > w * h - w) {
+				} else if (!(flags & TOP_FREE) && i >= w * h - w) {
 					data[i] = 1;
 				} else if (!(flags & LEFT_FREE) && i % w == 0) {
 					data[i] = 1;
@@ -155,8 +111,9 @@ class SceneBuilder {
 					data[i] = 0;
 				}
 			}
+
 			for (unsigned int i = 0; i < shapes.size(); i++) {
-				shapes[i]->blit(data, 1, resolution, fluidDomain2D);
+				shapes[i]->blit(data, resolution, fluidDomain2D);
 			}
 
 			cl_int err;
@@ -179,7 +136,7 @@ class SceneBuilder {
 				data[i] = 0;
 			}
 			for (unsigned int i = 0; i < shapes.size(); i++) {
-				shapes[i]->blit(data, 1, resolution, fluidDomain3D);
+				shapes[i]->blit(data, resolution, fluidDomain3D);
 			}
 
 			cl_int err;

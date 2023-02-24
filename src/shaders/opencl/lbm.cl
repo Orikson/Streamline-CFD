@@ -1,35 +1,25 @@
-__constant sampler_t sampler = CLK_NORMALIZED_COORDS_FALSE | CLK_ADDRESS_REPEAT | CLK_FILTER_LINEAR;
+__constant sampler_t sampler = CLK_NORMALIZED_COORDS_FALSE | CLK_ADDRESS_CLAMP_TO_EDGE | CLK_FILTER_NEAREST;
 
-__kernel void lbm_2d_stream_and_collide(
-        __read_only image2d_t boundaries,
-        __read_only image2d_t df_0,
-        __read_only image2d_t df_14,
-        __read_only image2d_t df_58,
-        __read_only image2d_t v_d,
-        __read_only image2d_t dfeq_0,
-        __read_only image2d_t dfeq_14,
-        __read_only image2d_t dfeq_58,
-        __private float dt, 
-        __write_only image2d_t of_0,
-        __write_only image2d_t of_14,
-        __write_only image2d_t of_58
-        ) {
-    unsigned int x = get_global_id(0);
-    unsigned int y = get_global_id(1);
-    int2 uv = (int2)(x, y);
-    
-    unsigned int bounds = read_imageui(boundaries, sampler, uv).x;
-    float f_0 = read_imagef(df_0, sampler, uv).x;
-    float4 f_14 = read_imagef(df_14, sampler, uv);
-    float4 f_58 = read_imagef(df_58, sampler, uv);
+__constant int2 e[9] = {
+    (int2)(0, 0),
+    (int2)(1, 0),
+    (int2)(-1, 0),
+    (int2)(0, 1),
+    (int2)(0, -1),
+    (int2)(1, 1),
+    (int2)(-1, -1),
+    (int2)(-1, 1),
+    (int2)(1, -1)
+};
+__constant float w[9] = {
+    0.44444f,
+    0.11111f,
+    0.11111f,
+    0.11111f,
+    0.11111f,
+    0.02778f,
+    0.02778f,
+    0.02778f,
+    0.02778f,
+};
 
-    float feq_0 = read_imagef(dfeq_0, sampler, uv).x;
-    float4 feq_14 = read_imagef(dfeq_14, sampler, uv);
-    float4 feq_58 = read_imagef(dfeq_58, sampler, uv);
-
-
-    // 
-
-
-    write_imagef(of_0, (int2)(x, y), (float4)(bounds, bounds, bounds, 1.));
-}
