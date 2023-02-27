@@ -16,7 +16,7 @@
 #include <clw.h>
 #include <VPHMCF/vphmcf.h>
 #include <LBM/lbm2d.h>
-#include "glshader.h"
+#include <glshader.h>
 #include "scenes/scene.h"
 
 #ifdef VPH_2D

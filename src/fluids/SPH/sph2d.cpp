@@ -2,7 +2,7 @@
 
 #ifdef SPH_2D
 
-SPH_2D_CPU::SPH_2D_CPU(QOpenGLFunctions* f, float dt, float rho, float mu, float k, vector<SPH_Particle2D*> init, vector<Shape*> boundaries) : Fluid("SPH_2D", dt), f(f), rho0(rho), mu(mu), particles(init), h0(/*dt * 4.0f*/0.01f), n(init.size()), k(k), boundaries(boundaries) {
+SPH_2D_CPU::SPH_2D_CPU(QOpenGLFunctions* f, float dt, float rho, float mu, float k, vector<SPH_Particle2D*> init, vector<Shape*> boundaries) : Fluid("SPH_2D", dt), f(f), rho0(rho), mu(mu), particles(init), h0(/*dt * 4.0f*/0.025f), n(init.size()), k(k), boundaries(boundaries) {
 	balanceField();
 	balanceBoundaryField();
 
@@ -36,7 +36,7 @@ void SPH_2D_CPU::render() {
 	for (int i = 0; i < n; i++) {
 		GLPoint tmp;
 		tmp.pos = glm::vec3(particles[i]->position * 2.0f - glm::vec2(1, 1), 0);
-		tmp.col = glm::vec3(1, 1, 1);
+		tmp.col = glm::vec3(glm::abs(particles[i]->velocity), 1);
 		verts.push_back(tmp);
 	}
 
@@ -143,7 +143,7 @@ void SPH_2D_CPU::integrate() {
 		pi->position += pi->velocity * deltaT;
 		
 		// dampen
-		pi->velocity *= 0.99;
+		pi->velocity *= 0.995;
 
 		// implements naive boundary conditions
 		// accurate boundary conditions would consider sampling falloff in kernels
@@ -157,8 +157,8 @@ void SPH_2D_CPU::integrate() {
 			vector<Shape*> neighborBoundaries = boundaryField[neighborhood[k]];
 			for (int j = 0; j < neighborBoundaries.size(); j ++) {
 				if (neighborBoundaries[j]->contains(pi->position)) {
+					pi->velocity = glm::reflect(pi->velocity, glm::normalize(neighborBoundaries[j]->normal(pi->position)));
 					pi->position = oldPosition;
-					pi->velocity = glm::reflect(pi->velocity, neighborBoundaries[j]->normal(pi->position));
 					
 					// Break out of nested loop without extra logic
 					goto CONTINUE;

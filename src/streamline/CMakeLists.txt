@@ -3,7 +3,6 @@
     "application.h" "application.cpp" 
     "glwidget.h" "glwidget.cpp" 
     "infoWidget.h" "infoWidget.cpp" 
-    "glshader.h" 
     "scenes/scene.h" 
     "scenes/sceneBuilder.h"
     "scenes/VPHMCF_2D/bubbleScene.h" 
@@ -11,7 +10,7 @@
     "scenes/SPH_2D/damBreakScene.h")
 
 target_link_libraries(streamline PRIVATE
-    defines fluids clwrapper
+    defines fluids clwrapper glwrapper
     Qt6::Widgets Qt6::Gui Qt6::OpenGLWidgets 
     OpenCL::OpenCL 
     glm::glm

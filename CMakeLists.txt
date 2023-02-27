@@ -27,11 +27,13 @@ find_package(OpenCL REQUIRED)
 find_package(glm CONFIG REQUIRED)
 find_package(GLEW REQUIRED)
 find_package(Qt6 REQUIRED COMPONENTS Widgets Gui OpenGLWidgets)
+find_package(assimp CONFIG REQUIRED)
 qt_standard_project_setup()
 
 add_library(defines STATIC "defines.h")
 target_include_directories(defines INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
 
+add_subdirectory(src/opengl)
 add_subdirectory(src/opencl)
 add_subdirectory(src/fluids)
 add_subdirectory(src/streamline)

@@ -195,20 +195,15 @@ class BBRectangle : virtual public Shape {
 
 		glm::vec2 normal(glm::vec2 point) override {
 			glm::vec2 norm = point - center2D;
-			glm::vec2 temp = glm::clamp(norm, dimension2D * 0.5f, -dimension2D * 0.5f);
-			if (temp == point) {
-				// inside rectangle
-				float R = dimension2D.x * 0.5 - norm.x;
-				float L = norm.x + dimension2D.x * 0.5;
-				float T = dimension2D.y * 0.5 - norm.y;
-				float B = norm.y + dimension2D.y * 0.5;
-				float minimum = min(R, min(L, min(T, B)));
-				if (minimum == R) { return glm::vec2(R, 0); }
-				else if (minimum == L) { return glm::vec2(-L, 0); }
-				else if (minimum == T) { return glm::vec2(0, T); }
-				else { return glm::vec2(0, -B); }
-			}
-			return norm - temp;
+			float R = dimension2D.x * 0.5 - norm.x;
+			float L = norm.x + dimension2D.x * 0.5;
+			float T = dimension2D.y * 0.5 - norm.y;
+			float B = norm.y + dimension2D.y * 0.5;
+			float minimum = min(R, min(L, min(T, B)));
+			if (minimum == R) { return glm::vec2(R, 0); }
+			else if (minimum == L) { return glm::vec2(-L, 0); }
+			else if (minimum == T) { return glm::vec2(0, T); }
+			else { return glm::vec2(0, -B); }
 		}
 		glm::vec3 normal(glm::vec3 point) override {
 			glm::vec3 norm = point - center3D;
