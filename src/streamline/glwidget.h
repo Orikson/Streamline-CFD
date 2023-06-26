@@ -10,6 +10,8 @@
 #include <QOpenGLContext>
 #include <QOpenGLWidget>
 #include <QOpenGLVertexArrayObject>
+#include <QMouseEvent>
+#include <QWheelEvent>
 
 #include <stdlib.h>
 
@@ -28,6 +30,9 @@
 #ifdef SPH_2D
 #include "scenes/SPH_2D/damBreakScene.h"
 #endif
+#ifdef WAV
+#include "scenes/WAV/boatScene.h"
+#endif
 
 class GLWidget : public QOpenGLWidget {
 	Q_OBJECT
@@ -38,10 +43,14 @@ class GLWidget : public QOpenGLWidget {
 		void initializeGL() override;
 		void paintGL() override;
 		void resizeGL(int w, int h) override;
+		void mouseMoveEvent(QMouseEvent* event) override;
+		void wheelEvent(QWheelEvent* event) override;
 	
 	private:
 		static const float vertices[12];
 		static const unsigned int indices[6];
+
+		QPoint mousePosition;
 
 		int frame;
 

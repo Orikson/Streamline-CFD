@@ -194,7 +194,8 @@ class CLContext {
 		// For interop, a glObjects vector is provided that must contain all relevant gl memory to the kernel
 		template <class ... Ts>
 		void runProgram(string pname, string rname, const cl::CommandQueue &queue, const cl::NDRange &globalOffset, const cl::NDRange &globalRange, const cl::NDRange &localRange, const vector<cl::Memory> &glObjects, Ts &&... args) {
-			queue.enqueueAcquireGLObjects(&glObjects);
+			int err; 
+			err = queue.enqueueAcquireGLObjects(&glObjects);
 
 			int i = 0;
 			cl::Kernel kernel(getProgram(pname), rname.c_str());
@@ -204,17 +205,18 @@ class CLContext {
 				i++;
 			}(), ...);
 
-			queue.enqueueNDRangeKernel(
+			err = queue.enqueueNDRangeKernel(
 				kernel,
 				globalOffset,
 				globalRange,
 				localRange
 			);
-			queue.enqueueReleaseGLObjects(&glObjects);
-			queue.finish();
+			err = queue.enqueueReleaseGLObjects(&glObjects);
+			err = queue.finish();
 		}
 		// Run the kernel with the given name, range, and arguments
 		// For interop, a glObjects vector is provided that must contain all relevant gl memory to the kernel
+		// pname is program name, rname is kernel name
 		template <class ... Ts>
 		void runProgram(string pname, string rname, Kernel& kernel, Ts &&... args) {
 			runProgram(pname, rname, kernel.queue, kernel.globalOffset, kernel.globalRange, kernel.localRange, kernel.glObjects, args...);

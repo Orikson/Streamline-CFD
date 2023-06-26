@@ -19,9 +19,12 @@ GLWidget::GLWidget(QWidget* parent) : QOpenGLWidget(parent) {
 	scene = NULL;
 	
 	frame = 0;
+
+	setMouseTracking(true);
+	mousePosition = QPoint(-1, -1);
 }
 GLWidget::~GLWidget() {
-
+	delete scene;
 }
 
 void GLWidget::initializeGL() {
@@ -83,6 +86,8 @@ void GLWidget::initializeGL() {
 	scene = new TurbulentScene(f, clContext, queue, imageGL, screenTexture->width(), screenTexture->height());
 #elif defined(SPH_2D) // SPH
 	scene = new DamBreakScene(f);
+#elif defined(WAV)
+	scene = new BoatScene(f, clContext, queue);
 #else // Default
 
 #endif // Default
@@ -113,4 +118,17 @@ void GLWidget::paintGL() {
 
 void GLWidget::resizeGL(int w, int h) {
 
+}
+
+void GLWidget::mouseMoveEvent(QMouseEvent* event) {
+	if (event->buttons() != Qt::LeftButton || mousePosition.x() < 0 || scene == NULL) {
+		mousePosition = event->pos();
+		return;
+	}
+	scene->updateMouse(event->pos().x() - mousePosition.x(), mousePosition.y() - event->pos().y(), 0);
+	mousePosition = event->pos();
+}
+
+void GLWidget::wheelEvent(QWheelEvent* event) {
+	scene->updateMouse(0, 0, event->angleDelta().y());
 }

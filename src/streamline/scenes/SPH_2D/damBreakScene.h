@@ -9,7 +9,7 @@
 #include <shapes.h>
 #include "../sceneBuilder.h"
 #include "../scene.h"
-#include "../../glshader.h"
+#include <glshader.h>
 
 #ifdef SPH_2D
 

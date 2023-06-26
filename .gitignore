@@ -37,3 +37,6 @@ CMakeSettings.json
 
 # VS
 .vs
+
+# Resource objects
+!resources/boat.obj

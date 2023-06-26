@@ -32,6 +32,7 @@ qt_standard_project_setup()
 
 add_library(defines STATIC "defines.h")
 target_include_directories(defines INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
+target_compile_definitions(defines PUBLIC STB_IMAGE_IMPLEMENTATION)
 
 add_subdirectory(src/opengl)
 add_subdirectory(src/opencl)

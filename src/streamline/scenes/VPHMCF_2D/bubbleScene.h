@@ -5,7 +5,7 @@
 #include <QOpenGLFunctions>
 #include <VPHMCF/vphmcf.h>
 #include "../scene.h"
-#include "../../glshader.h"
+#include <glshader.h>
 
 #ifdef VPH_2D
 

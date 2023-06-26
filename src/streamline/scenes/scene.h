@@ -7,6 +7,8 @@ class Scene {
 		~Scene() {}
 		virtual void render() {}
 		virtual void step() {}
+		virtual void updateMouse(float mX, float mY, float mS) {}
+		virtual void updateKeyboard(vector<char> keys) {}
 		bool useScreenPlane() { return usePlane; }
 
 	protected:
